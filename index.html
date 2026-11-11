@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAP 是什麼？ - 教學簡報</title>
+<style>
+:root{
+  --bg:#e9ecef; --slide:#ffffff; --text:#22272e; --muted:#636c76; --line:#d8dde3;
+  --accent:#1f5f5b; --accent-soft:#e3efed; --warn:#9a6700; --warn-soft:#fff4d6;
+  --ok:#1a7f37; --ok-soft:#dcf5e3; --bad:#b42318; --bad-soft:#fde4e1;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden}
+body{font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;color:var(--text)}
+code{font-family:Consolas,"Courier New",monospace;background:#f1f3f5;border:1px solid var(--line);border-radius:4px;padding:0 6px;font-size:.92em}
+
+/* 投影片固定 1280x720，再依視窗縮放 */
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center center}
+.slide{position:absolute;inset:0;background:var(--slide);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.12);
+  padding:64px 80px 70px;display:none;flex-direction:column;overflow:hidden}
+.slide.active{display:flex}
+.slide h2{font-size:42px;margin:0 0 6px;line-height:1.3}
+.slide .kicker{color:var(--accent);font-weight:700;font-size:18px;letter-spacing:.06em;margin-bottom:6px}
+.slide p,.slide li{font-size:25px;line-height:1.65}
+.slide ul{margin:18px 0 0;padding-left:32px}
+.slide li{margin:6px 0}
+.src{position:absolute;left:80px;right:80px;bottom:22px;font-size:15px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;display:flex;justify-content:space-between}
+.src b{font-weight:400;color:var(--accent)}
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+.lead{font-size:27px;color:var(--muted);margin:10px 0 0}
+.box{border:2px solid var(--line);border-radius:10px;padding:14px 18px;background:#fafbfc}
+.hl{color:var(--accent);font-weight:700}
+
+/* 封面 */
+.cover{background:var(--accent);color:#fff;justify-content:center}
+.cover h1{font-size:76px;margin:0 0 18px}
+.cover p{font-size:28px;opacity:.92;margin:0;max-width:900px}
+.cover .meta{margin-top:46px;font-size:20px;opacity:.8}
+.cover .src{color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.3)}
+.cover .src b{color:#fff}
+
+/* 學習目標 */
+.goals{list-style:none;padding:0;counter-reset:g;display:grid;grid-template-columns:1fr 1fr;gap:16px 40px}
+.goals li{counter-increment:g;display:flex;gap:14px;align-items:flex-start;margin:0}
+.goals li::before{content:counter(g);flex:none;width:40px;height:40px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:700;display:grid;place-items:center;font-size:20px;margin-top:4px}
+
+/* 沒有 ERP / 有 ERP */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.compare .box{padding:22px 24px}
+.compare h3{margin:0 0 18px;font-size:28px}
+.depts{display:flex;justify-content:space-around;gap:12px}
+.dept{text-align:center;font-size:24px}
+.dept .name{border:2px solid var(--line);border-radius:8px;padding:8px 14px;background:#fff}
+.db{width:110px;height:78px;margin:12px auto 0;border:2px solid var(--muted);border-radius:50%/14px;position:relative;background:#f4f5f7}
+.db.big{width:240px;height:104px;border-color:var(--accent);background:var(--accent-soft);display:grid;place-items:center;font-size:21px;font-weight:700;color:var(--accent);border-radius:50%/20px}
+.links{height:40px;border-left:2px solid var(--accent);border-right:2px solid var(--accent);border-bottom:2px solid var(--accent);margin:8px 70px 0;border-radius:0 0 8px 8px;position:relative}
+.links::after{content:"";position:absolute;left:50%;top:0;bottom:-2px;border-left:2px solid var(--accent)}
+.note{font-size:22px;color:var(--muted);margin-top:16px}
+.bad-note{color:var(--bad)}
+.good-note{color:var(--ok)}
+
+/* 時間軸 */
+.timeline{position:relative;display:flex;justify-content:space-between;margin:10px 10px 0}
+.timeline::before{content:"";position:absolute;left:0;right:0;top:19px;border-top:3px solid var(--line)}
+.tl{position:relative;width:200px;text-align:center}
+.tl .dot{width:40px;height:40px;border-radius:50%;background:#fff;border:3px solid var(--accent);margin:0 auto}
+.tl.now .dot{background:var(--accent)}
+.tl .year{font-size:36px;font-weight:700;margin-top:12px;color:var(--accent)}
+.tl .name{font-size:28px;font-weight:700}
+.tl .desc{font-size:21px;color:var(--muted);line-height:1.5;margin-top:4px}
+
+/* 模組 */
+.mods{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:26px}
+.mod{border:2px solid var(--line);border-radius:10px;padding:26px 10px;text-align:center;background:#fff}
+.mod b{display:block;font-size:36px;color:var(--accent)}
+.mod span{font-size:22px}
+.center-db{margin:22px auto 0;width:420px;text-align:center;border:2px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:12px;font-size:22px;font-weight:700;color:var(--accent)}
+.up{text-align:center;color:var(--accent);font-size:22px;margin-top:10px;letter-spacing:.3em}
+
+/* 流程 */
+.flow{display:flex;align-items:stretch;gap:0;margin-top:10px}
+.step{flex:1;border:2px solid var(--line);border-radius:10px;padding:28px 24px;background:#fff}
+.step .who{font-size:21px;color:var(--muted)}
+.step .mod-tag{display:inline-block;background:var(--accent);color:#fff;border-radius:6px;padding:2px 14px;font-weight:700;font-size:26px;margin:8px 0}
+.step p{font-size:26px;margin:6px 0 0}
+.arrow{width:56px;display:grid;place-items:center;font-size:34px;color:var(--accent);flex:none}
+
+/* SAP GUI 示意 */
+.gui{border:2px solid #8a939d;border-radius:8px;overflow:hidden;margin-top:18px;font-size:19px}
+.gui .bar{background:#dfe5ec;padding:8px 14px;border-bottom:1px solid #b9c2cc}
+.gui .tool{background:#eef1f5;padding:8px 14px;display:flex;align-items:center;gap:14px;border-bottom:1px solid #b9c2cc}
+.gui .cmdfield{background:#fff;border:1px solid #8a939d;padding:2px 10px;width:260px;font-family:Consolas,monospace;font-size:20px}
+.gui .btn{border:1px solid #aab3bd;background:#fff;border-radius:4px;padding:1px 10px;font-size:17px}
+.gui .main{padding:18px 14px;color:var(--muted);min-height:90px}
+.gui .status{background:#e8f5e9;color:var(--ok);padding:6px 14px;border-top:1px solid #b9c2cc}
+.lang{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.lang div{border:2px solid var(--line);border-radius:10px;padding:10px;text-align:center;font-size:22px}
+.lang small{display:block;color:var(--muted);font-size:16px}
+
+/* 交易碼表 */
+table.cmd{border-collapse:collapse;margin-top:18px;font-size:22px;width:100%}
+table.cmd td,table.cmd th{border:1px solid var(--line);padding:9px 14px;text-align:left}
+table.cmd th{background:#f4f6f8}
+.warn{background:var(--warn-soft);border-left:5px solid var(--warn);border-radius:6px;padding:10px 16px;margin-top:18px;font-size:21px}
+
+/* ABAP 建表順序 */
+.chain{display:flex;align-items:center;margin-top:22px}
+.chain .box{flex:1;text-align:center;font-size:22px}
+.chain .box b{display:block;font-size:26px;color:var(--accent)}
+
+/* 2027 */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:20px}
+.split .box h3{margin:0 0 6px;font-size:24px}
+.split .stop{border-color:var(--bad);background:var(--bad-soft)}
+.split .keep{border-color:var(--ok);background:var(--ok-soft)}
+.split li{font-size:22px}
+
+/* 重點回顧 */
+.recap{list-style:none;padding:0;margin-top:18px}
+.recap li{border-left:5px solid var(--accent);background:#f7f9f9;padding:8px 18px;margin:10px 0;font-size:24px}
+
+/* 小測驗 */
+.quiz{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:16px}
+.q{border:2px solid var(--line);border-radius:10px;padding:14px 16px}
+.q p{font-size:21px;font-weight:700;margin:0 0 10px;line-height:1.45}
+.q button{display:block;width:100%;text-align:left;font:inherit;font-size:19px;padding:8px 12px;margin:7px 0;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer}
+.q button:hover{border-color:var(--accent)}
+.q button.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok);font-weight:700}
+.q button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.q .why{font-size:17px;color:var(--muted);min-height:48px;margin-top:6px;line-height:1.45}
+
+/* 資料來源 */
+.refs{list-style:none;padding:0;margin-top:14px}
+.refs li{font-size:21px;margin:10px 0;line-height:1.45}
+.refs b{color:var(--accent);margin-right:8px}
+.refs a{color:var(--muted);word-break:break-all;font-size:17px}
+
+/* 控制列 */
+#ui{position:fixed;left:0;right:0;bottom:0;height:46px;display:flex;align-items:center;justify-content:center;gap:16px;font-size:15px;color:var(--muted)}
+#ui button{font:inherit;border:1px solid #c5ccd3;background:#fff;border-radius:6px;padding:4px 14px;cursor:pointer}
+#bar{position:fixed;left:0;top:0;height:4px;background:var(--accent);transition:width .25s}
+@media print{#ui,#bar{display:none}}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="stage">
+
+<!-- 01 -->
+<section class="slide cover">
+  <div class="kicker" style="color:#cfe6e3">給修課同學的 SAP 入門</div>
+  <h1>SAP 是什麼？</h1>
+  <p>SAP 是一家德國企業軟體公司，它做的 ERP 系統，是很多公司每天在用的工作系統。</p>
+  <div class="meta">資料來源：自建 LLM Wiki（7 篇資料）</div>
+  <div class="src"><span>出處：<b>wiki/sap-company.md</b>、<b>wiki/erp.md</b></span><span>01</span></div>
+</section>
+
+<!-- 02 -->
+<section class="slide">
+  <div class="kicker">LEARNING GOALS</div>
+  <h2>今天會學到</h2>
+  <div class="body">
+    <ul class="goals">
+      <li>ERP 是什麼，公司為什麼需要它</li>
+      <li>SAP 是誰，產品怎麼一代一代演進</li>
+      <li>SAP 的模組，以及資料怎麼整合</li>
+      <li>實際怎麼操作 SAP</li>
+      <li>為什麼大家都在談 2027</li>
+    </ul>
+  </div>
+  <div class="src"><span>出處：<b>wiki/index.md</b></span><span>02</span></div>
+</section>
+
+<!-- 03 -->
+<section class="slide">
+  <div class="kicker">THINK FIRST</div>
+  <h2>先想一個問題</h2>
+  <div class="body">
+    <p>如果<span class="hl">業務、倉庫、財務</span>各用自己的 Excel，客戶下了一張訂單，會發生什麼事？</p>
+    <ul>
+      <li>同一張訂單，三個部門各輸入一次</li>
+      <li>有人改了數量，其他人的檔案沒跟著改</li>
+      <li>月底對帳數字對不起來，只好互相打電話確認</li>
+    </ul>
+  </div>
+  <div class="src"><span>出處：<b>wiki/erp.md</b></span><span>03</span></div>
+</section>
+
+<!-- 04 -->
+<section class="slide">
+  <div class="kicker">DEFINITION</div>
+  <h2>ERP 是什麼</h2>
+  <div class="body">
+    <p><span class="hl">ERP</span> = Enterprise Resource Planning，企業資源規劃</p>
+    <ul>
+      <li>把<b>採購、生產、銷售、財務、人資</b>的資料，集中在同一套系統</li>
+      <li>每個部門看到的是<b>同一份資料</b>（single view of the truth）</li>
+      <li>資料在部門之間流動，<b>不用重複輸入</b></li>
+    </ul>
+  </div>
+  <div class="src"><span>出處：<b>wiki/erp.md</b></span><span>04</span></div>
+</section>
+
+<!-- 05 -->
+<section class="slide">
+  <div class="kicker">COMPARE</div>
+  <h2>沒有 ERP 與有 ERP</h2>
+  <div class="body">
+  <div class="compare">
+    <div class="box">
+      <h3>沒有 ERP：各存各的</h3>
+      <div class="depts">
+        <div class="dept"><div class="name">業務</div><div class="db"></div></div>
+        <div class="dept"><div class="name">倉庫</div><div class="db"></div></div>
+        <div class="dept"><div class="name">財務</div><div class="db"></div></div>
+      </div>
+      <p class="note bad-note">資料難分享、容易出錯、重複輸入</p>
+    </div>
+    <div class="box">
+      <h3>有 ERP：共用一份</h3>
+      <div class="depts">
+        <div class="dept"><div class="name">業務</div></div>
+        <div class="dept"><div class="name">倉庫</div></div>
+        <div class="dept"><div class="name">財務</div></div>
+      </div>
+      <div class="links"></div>
+      <div class="db big">中央資料庫</div>
+      <p class="note good-note">比喻：全班共用一份 Google 試算表</p>
+    </div>
+  </div>
+  </div>
+  <div class="src"><span>出處：<b>wiki/erp.md</b></span><span>05</span></div>
+</section>
+
+<!-- 06 -->
+<section class="slide">
+  <div class="kicker">COMPANY</div>
+  <h2>SAP 是誰</h2>
+  <div class="body">
+    <ul>
+      <li><b>1972 年</b>由五位前 IBM 員工在德國創立</li>
+      <li>總部在德國<b>瓦爾多夫</b>（Walldorf）</li>
+      <li>名字來自德文 <i>Systemanalyse Programmentwicklung</i>，意思是「系統分析與程式開發」</li>
+      <li>員工超過 <b>105,000</b> 人</li>
+    </ul>
+  </div>
+  <div class="src"><span>出處：<b>wiki/sap-company.md</b></span><span>06</span></div>
+</section>
+
+<!-- 07 -->
+<section class="slide">
+  <div class="kicker">HISTORY</div>
+  <h2>SAP 產品演進</h2>
+  <div class="body">
+  <div class="timeline">
+    <div class="tl"><div class="dot"></div><div class="year">1979</div><div class="name">R/2</div><div class="desc">開始開發第二代軟體</div></div>
+    <div class="tl"><div class="dot"></div><div class="year">1992</div><div class="name">R/3</div><div class="desc">主從式架構，<br>SAP 走向全球</div></div>
+    <div class="tl"><div class="dot"></div><div class="year">2004</div><div class="name">ECC</div><div class="desc">接替 R/3，<br>安裝最多的系統</div></div>
+    <div class="tl"><div class="dot"></div><div class="year">2011</div><div class="name">HANA</div><div class="desc">記憶體內資料庫<br>開始有客戶使用</div></div>
+    <div class="tl now"><div class="dot"></div><div class="year">2015</div><div class="name">S/4HANA</div><div class="desc">完全建立在 HANA 上<br>的新一代 ERP</div></div>
+  </div>
+  </div>
+  <div class="src"><span>出處：<b>wiki/sap-products.md</b></span><span>07</span></div>
+</section>
+
+<!-- 08 -->
+<section class="slide">
+  <div class="kicker">MODULES</div>
+  <h2>SAP 的模組</h2>
+  <div class="body">
+  <p class="lead">SAP 依照公司的業務分成很多模組，以下是最基本的五個：</p>
+  <div class="mods">
+    <div class="mod"><b>FI/CO</b><span>財務與管理會計</span></div>
+    <div class="mod"><b>SD</b><span>銷售與配送</span></div>
+    <div class="mod"><b>MM</b><span>物料管理</span></div>
+    <div class="mod"><b>PP</b><span>生產規劃</span></div>
+    <div class="mod"><b>HCM</b><span>人力資源</span></div>
+  </div>
+  <div class="up">↑ ↑ ↑ ↑ ↑</div>
+  <div class="center-db">全部共用一個中央資料庫</div>
+  </div>
+  <div class="src"><span>出處：<b>wiki/sap-modules.md</b></span><span>08</span></div>
+</section>
+
+<!-- 09 -->
+<section class="slide">
+  <div class="kicker">EXAMPLE</div>
+  <h2>一張訂單在 SAP 裡怎麼流動</h2>
+  <div class="body">
+  <div class="flow">
+    <div class="step"><div class="who">業務</div><div class="mod-tag">SD</div><p>建立客戶訂單</p></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="who">倉庫</div><div class="mod-tag">MM</div><p>看到要出的貨，準備出貨</p></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="who">財務</div><div class="mod-tag">FI</div><p>自動產生應收帳款</p></div>
+  </div>
+  <p class="note" style="font-size:24px;margin-top:30px">資料只在一開始輸入<span class="hl">一次</span>，後面的部門直接接著用，不用再打一遍。</p>
+  </div>
+  <div class="src"><span>出處：<b>wiki/sap-modules.md</b>、<b>wiki/erp.md</b>（流程為教學比喻）</span><span>09</span></div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="kicker">HOW TO USE</div>
+  <h2>怎麼操作 SAP：SAP GUI</h2>
+  <div class="body">
+  <p class="lead">登入時要填：用戶端、帳號、密碼、登入語言</p>
+  <div class="gui">
+    <div class="bar">選單列　功能表　編輯　跳至　其他　系統　說明</div>
+    <div class="tool"><span class="cmdfield">SE11</span><span class="btn">儲存</span><span class="btn">返回</span><span class="btn">結束</span><span class="btn">取消</span></div>
+    <div class="main">SAP Easy Access</div>
+    <div class="status">狀態列：綠色成功、黃色警告、紅色錯誤</div>
+  </div>
+  <div class="lang">
+    <div>啟用<small>中文介面</small></div>
+    <div>Activate<small>英文介面</small></div>
+    <div>Aktivieren<small>德文介面</small></div>
+  </div>
+  </div>
+  <div class="src"><span>出處：<b>wiki/sap-gui.md</b>（畫面為示意圖）</span><span>10</span></div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <div class="kicker">T-CODE</div>
+  <h2>交易碼 T-code</h2>
+  <div class="body">
+  <p class="lead">在命令欄輸入交易碼，按 Enter 就能進入功能，最長 20 個字元。</p>
+  <table class="cmd">
+    <tr><th>輸入</th><th>效果</th></tr>
+    <tr><td><code>SE11</code></td><td>進入 ABAP Dictionary</td></tr>
+    <tr><td><code>/n</code></td><td>取消目前的交易</td></tr>
+    <tr><td><code>/nSE11</code></td><td>取消目前的交易，再開啟 SE11</td></tr>
+    <tr><td><code>/oSE11</code></td><td>開一個新的工作階段來執行 SE11</td></tr>
+  </table>
+  <div class="warn">注意：還沒存檔就輸入 <code>/n</code>，剛才的修改會不見。</div>
+  </div>
+  <div class="src"><span>出處：<b>wiki/sap-gui.md</b></span><span>11</span></div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <div class="kicker">FOR DEVELOPERS</div>
+  <h2>開發者的角度：ABAP</h2>
+  <div class="body">
+    <ul>
+      <li><b>ABAP</b>：SAP 為了開發商業應用自己做的程式語言</li>
+      <li><b>ABAP Dictionary</b>（交易碼 <code>SE11</code>）：定義資料型態和資料表</li>
+    </ul>
+    <p style="margin-top:22px">在 SE11 建一張資料表的順序：</p>
+    <div class="chain">
+      <div class="box"><b>網域</b>Domain<br>型態、長度</div><div class="arrow">→</div>
+      <div class="box"><b>資料元素</b>Data Element<br>欄位意義、標籤</div><div class="arrow">→</div>
+      <div class="box"><b>資料表</b>Table<br>組成欄位</div>
+    </div>
+    <p class="note">每一步都要按「啟用」，下一步才能使用。</p>
+  </div>
+  <div class="src"><span>出處：<b>wiki/abap.md</b></span><span>12</span></div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <div class="kicker">WHY 2027</div>
+  <h2>為什麼大家都在談 2027</h2>
+  <div class="body">
+  <p class="lead">ECC 的主流維護在 <b>2027 年底</b>結束，所以很多公司正在換成 S/4HANA。</p>
+  <div class="split">
+    <div class="box stop"><h3>結束之後會停止</h3><ul><li>標準修正</li><li>法規更新</li><li>安全性修補</li></ul></div>
+    <div class="box keep"><h3>結束之後不會停止</h3><ul><li>軟體還能繼續執行</li><li>授權仍然有效</li></ul></div>
+  </div>
+  <p class="note">這個期限 SAP 已經延過兩次（2020 → 2025 → 2027）。部分內容來自顧問公司文章，屬於廠商說法。</p>
+  </div>
+  <div class="src"><span>出處：<b>wiki/ecc-2027.md</b>、<b>wiki/sap-products.md</b></span><span>13</span></div>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <div class="kicker">RECAP</div>
+  <h2>重點回顧</h2>
+  <div class="body">
+  <ul class="recap">
+    <li>ERP 把各部門的資料集中在同一套系統</li>
+    <li>SAP 是做 ERP 的德國公司，最新一代是 S/4HANA</li>
+    <li>SAP 依業務分成模組，全部共用中央資料庫</li>
+    <li>用 SAP GUI 和交易碼操作，介面可能是中、英、德文</li>
+    <li>ECC 主流維護在 2027 年底結束</li>
+  </ul>
+  </div>
+  <div class="src"><span>出處：<b>wiki/erp.md</b>、<b>sap-company.md</b>、<b>sap-modules.md</b>、<b>sap-gui.md</b>、<b>ecc-2027.md</b></span><span>14</span></div>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <div class="kicker">QUIZ</div>
+  <h2>小測驗</h2>
+  <div class="body">
+  <p class="lead" style="font-size:21px">點選你覺得正確的答案</p>
+  <div class="quiz">
+    <div class="q">
+      <p>1. ERP 主要解決什麼問題？</p>
+      <button data-r="0">讓電腦跑得更快</button>
+      <button data-r="1">各部門資料分散、要重複輸入</button>
+      <button data-r="0">幫公司設計網站</button>
+      <div class="why" data-why="ERP 把資料集中在同一套系統，大家看到同一份資料。"></div>
+    </div>
+    <div class="q">
+      <p>2. S/4HANA 建立在哪一種資料庫上？</p>
+      <button data-r="0">Excel 試算表</button>
+      <button data-r="0">各部門自己的資料庫</button>
+      <button data-r="1">SAP HANA 記憶體內資料庫</button>
+      <div class="why" data-why="S/4HANA 在 2015 年推出，完全建立在 SAP HANA 上。"></div>
+    </div>
+    <div class="q">
+      <p>3. 在命令欄輸入 /oSE11 會怎樣？</p>
+      <button data-r="1">開一個新的工作階段執行 SE11</button>
+      <button data-r="0">登出 SAP</button>
+      <button data-r="0">刪除 SE11</button>
+      <div class="why" data-why="/o 開新工作階段；/n 則會取消目前的交易。"></div>
+    </div>
+  </div>
+  </div>
+  <div class="src"><span>出處：<b>wiki/erp.md</b>、<b>sap-products.md</b>、<b>sap-gui.md</b></span><span>15</span></div>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <div class="kicker">REFERENCES</div>
+  <h2>資料來源</h2>
+  <div class="body">
+  <ul class="refs">
+    <li><b>S01</b>SAP History（官方）<br><a href="https://www.sap.com/about/company/history.html">https://www.sap.com/about/company/history.html</a></li>
+    <li><b>S02</b>What is SAP?（官方）<br><a href="https://sap.com/ukraine/about/what-is-sap.html">https://sap.com/ukraine/about/what-is-sap.html</a></li>
+    <li><b>S03</b>What is SAP ERP?（TechTarget）<br><a href="https://www.techtarget.com/enterprise-software/definition/What-is-SAP-ERP">https://www.techtarget.com/enterprise-software/definition/What-is-SAP-ERP</a></li>
+    <li><b>S04</b>SAP ECC End of Maintenance 2027（顧問公司，廠商說法）<br><a href="https://saplicensingexperts.com/blog/sap-ecc-end-of-maintenance-2027">https://saplicensingexperts.com/blog/sap-ecc-end-of-maintenance-2027</a></li>
+    <li><b>S05</b>ABAP Overview（官方）　<b>S06</b>Introducing the SAP GUI（SAP Learning）　<b>S07</b>我的 SAP 新手筆記</li>
+  </ul>
+  </div>
+  <div class="src"><span>出處：<b>wiki/index.md</b>，完整網址見 raw/ 資料夾</span><span>16</span></div>
+</section>
+
+</div>
+<div id="ui"><button id="prev" aria-label="上一張">上一張</button><span id="num"></span><button id="next" aria-label="下一張">下一張</button><span>鍵盤左右鍵也可以切換</span></div>
+
+<script>
+(function(){
+  var slides=document.querySelectorAll('.slide'), stage=document.getElementById('stage'), i=0;
+  function fit(){
+    var s=Math.min(window.innerWidth/1320,(window.innerHeight-56)/740);
+    stage.style.transform='translate(-50%,calc(-50% - 20px)) scale('+s+')';
+  }
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(el,k){el.classList.toggle('active',k===i);});
+    document.getElementById('num').textContent=(i+1)+' / '+slides.length;
+    document.getElementById('bar').style.width=((i+1)/slides.length*100)+'%';
+    history.replaceState(null,'','#'+(i+1));
+  }
+  document.getElementById('prev').onclick=function(){show(i-1);};
+  document.getElementById('next').onclick=function(){show(i+1);};
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();show(i+1);}
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(i-1);}
+  });
+  // 小測驗：點選後顯示對錯與說明
+  document.querySelectorAll('.q').forEach(function(q){
+    q.querySelectorAll('button').forEach(function(b){
+      b.onclick=function(){
+        q.querySelectorAll('button').forEach(function(x){x.classList.remove('right','wrong');});
+        b.classList.add(b.dataset.r==='1'?'right':'wrong');
+        q.querySelector('.why').textContent=(b.dataset.r==='1'?'答對了！':'再想想。')+q.querySelector('.why').dataset.why;
+      };
+    });
+  });
+  window.addEventListener('resize',fit);
+  fit();
+  show((parseInt(location.hash.slice(1),10)||1)-1);
+})();
+</script>
+</body>
+</html>
